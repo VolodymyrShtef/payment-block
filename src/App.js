@@ -1,23 +1,121 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import Modal from "./components/Modal";
+import MC from "./images/mc_symbol.svg";
+import visa from "./images/visa.svg";
+import noname from "./images/debit-card.svg";
 
 function App() {
+  const [doPayment, changePayingView] = useState(false);
+  const [summaryShow, changeSummaryView] = useState(true);
+  const [modalShow, changeModalView] = useState(false);
+  const [confirmShow, changeConfirmView] = useState(false);
+  const [currentCard, changeCard] = useState(0);
+  const cards = useSelector((state) => state);
+  const { number, holder, issuer, expM, expY } = cards[currentCard];
+
+  const changeCurrentCardView = (direction) => {
+    if (direction === 1 && currentCard === cards.length - 1) {
+      changeCard(0);
+      return;
+    }
+    if (direction === -1 && currentCard === 0) {
+      changeCard(cards.length - 1);
+      return;
+    }
+    if (direction === 10) {
+      changeCard(cards.length);
+      return;
+    }
+
+    changeCard(() => currentCard + direction);
+  };
+
+  const chooseCard = (e) => {
+    const conf = window.confirm(
+      `Finish the payment with card ${e.currentTarget.id} ?`
+    );
+    if (conf === true) {
+      changePayingView(!doPayment);
+      changePayingView(!doPayment);
+      changeConfirmView(!confirmShow);
+      changeSummaryView(!summaryShow);
+    }
+  };
+
+  const showAddCardForm = () => {
+    changeModalView(true);
+    window.addEventListener("keydown", hideModal);
+  };
+
+  const hideModal = (e) => {
+    if (
+      e === undefined ||
+      e.code === "Escape" ||
+      e.currentTarget.name === "cancel"
+    ) {
+      changeModalView(false);
+      window.removeEventListener("keydown", hideModal);
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="allwrapper">
+      {summaryShow && (
+        <div>
+          <p>You have 5 selected items</p>
+          <p>Total: 2000$</p>
+          <button onClick={() => changePayingView(!doPayment)}>
+            Check out
+          </button>
+        </div>
+      )}
+
+      {doPayment && (
+        <>
+          <h2>Select a card for paying:</h2>
+          <div className="cardwrapper">
+            <button onClick={() => changeCurrentCardView(-1)}>Prev</button>
+            <div className="slider" id={number} onClick={chooseCard}>
+              <img
+                src={
+                  cards[currentCard].issuer === "MasterCard"
+                    ? MC
+                    : cards[currentCard].issuer === "Visa"
+                    ? visa
+                    : noname
+                }
+                alt="symbol"
+                width="50"
+              />
+              <div>
+                {" "}
+                <p>{holder}</p>
+                <p>{number}</p>
+                <p>{issuer}</p>
+                <span>{expM} / </span>
+                <span>{expY}</span>
+              </div>
+            </div>
+            <button onClick={() => changeCurrentCardView(1)}>Next</button>
+            <br />
+          </div>{" "}
+          <button onClick={showAddCardForm}>Add New Card</button>
+        </>
+      )}
+
+      {confirmShow && (
+        <>
+          <h1>Thank you!</h1>
+          <p>Your payment was successful</p>
+          <p>You was charged 2000$</p>
+          <p>Used card number: {number}</p>
+        </>
+      )}
+
+      {modalShow && (
+        <Modal onHideModal={hideModal} onAddingCard={changeCurrentCardView} />
+      )}
     </div>
   );
 }
