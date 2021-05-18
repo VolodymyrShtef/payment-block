@@ -5,25 +5,35 @@ import MC from "./images/mc_symbol.svg";
 import visa from "./images/visa.svg";
 import noname from "./images/debit-card.svg";
 
+const GOLEFT = -1;
+const GORIGHT = 1;
+const GOLAST = 10;
+
 function App() {
-  const [doPayment, changePayingView] = useState(false);
-  const [summaryShow, changeSummaryView] = useState(true);
+  const [currentView, changeCurrentView] = useState({
+    doPayment: false,
+    summaryShow: true,
+    confirmShow: false,
+  });
+
   const [modalShow, changeModalView] = useState(false);
-  const [confirmShow, changeConfirmView] = useState(false);
+
   const [currentCard, changeCard] = useState(0);
   const cards = useSelector((state) => state);
+
   const { number, holder, issuer, expM, expY } = cards[currentCard];
+  const { doPayment, summaryShow, confirmShow } = currentView;
 
   const changeCurrentCardView = (direction) => {
-    if (direction === 1 && currentCard === cards.length - 1) {
+    if (direction === GORIGHT && currentCard === cards.length - 1) {
       changeCard(0);
       return;
     }
-    if (direction === -1 && currentCard === 0) {
+    if (direction === GOLEFT && currentCard === 0) {
       changeCard(cards.length - 1);
       return;
     }
-    if (direction === 10) {
+    if (direction === GOLAST) {
       changeCard(cards.length);
       return;
     }
@@ -36,10 +46,11 @@ function App() {
       `Finish the payment with card ${e.currentTarget.id} ?`
     );
     if (conf === true) {
-      changePayingView(!doPayment);
-      changePayingView(!doPayment);
-      changeConfirmView(!confirmShow);
-      changeSummaryView(!summaryShow);
+      changeCurrentView({
+        doPayment: !doPayment,
+        confirmShow: !confirmShow,
+        summaryShow: !summaryShow,
+      });
     }
   };
 
@@ -65,7 +76,11 @@ function App() {
         <div>
           <p>You have 5 selected items</p>
           <p>Total: 2000$</p>
-          <button onClick={() => changePayingView(!doPayment)}>
+          <button
+            onClick={() =>
+              changeCurrentView({ ...currentView, doPayment: !doPayment })
+            }
+          >
             Check out
           </button>
         </div>
@@ -75,7 +90,7 @@ function App() {
         <>
           <h2>Select a card for paying:</h2>
           <div className="cardwrapper">
-            <button onClick={() => changeCurrentCardView(-1)}>Prev</button>
+            <button onClick={() => changeCurrentCardView(GOLEFT)}>Prev</button>
             <div className="slider" id={number} onClick={chooseCard}>
               <img
                 src={
@@ -97,7 +112,7 @@ function App() {
                 <span>{expY}</span>
               </div>
             </div>
-            <button onClick={() => changeCurrentCardView(1)}>Next</button>
+            <button onClick={() => changeCurrentCardView(GORIGHT)}>Next</button>
             <br />
           </div>{" "}
           <button onClick={showAddCardForm}>Add New Card</button>

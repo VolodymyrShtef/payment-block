@@ -4,6 +4,7 @@ import addNewCard from "../redux/actions";
 import { Formik } from "formik";
 import validationsSchema from "./validation";
 
+const GOLAST = 10;
 export default function Modal({ onHideModal, onAddingCard }) {
   const dispatch = useDispatch();
   const cards = useSelector((state) => state);
@@ -25,7 +26,7 @@ export default function Modal({ onHideModal, onAddingCard }) {
         values.issuer = "XYZ";
     }
     dispatch(addNewCard(values));
-    onAddingCard(10);
+    onAddingCard(GOLAST);
     onHideModal();
   };
 
