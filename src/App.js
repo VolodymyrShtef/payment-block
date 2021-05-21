@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import useModal from "./hooks/useModal";
 import Modal from "./components/Modal";
 import MC from "./images/mc_symbol.svg";
 import visa from "./images/visa.svg";
@@ -16,10 +17,9 @@ function App() {
     confirmShow: false,
   });
 
-  const [modalShow, changeModalView] = useState(false);
-
   const [currentCard, changeCard] = useState(0);
   const cards = useSelector((state) => state);
+  const [modalShow, toggleModal] = useModal(false);
 
   const { number, holder, issuer, expM, expY } = cards[currentCard];
   const { doPayment, summaryShow, confirmShow } = currentView;
@@ -51,22 +51,6 @@ function App() {
         confirmShow: !confirmShow,
         summaryShow: !summaryShow,
       });
-    }
-  };
-
-  const showAddCardForm = () => {
-    changeModalView(true);
-    window.addEventListener("keydown", hideModal);
-  };
-
-  const hideModal = (e) => {
-    if (
-      e === undefined ||
-      e.code === "Escape" ||
-      e.currentTarget.name === "cancel"
-    ) {
-      changeModalView(false);
-      window.removeEventListener("keydown", hideModal);
     }
   };
 
@@ -115,7 +99,7 @@ function App() {
             <button onClick={() => changeCurrentCardView(GORIGHT)}>Next</button>
             <br />
           </div>{" "}
-          <button onClick={showAddCardForm}>Add New Card</button>
+          <button onClick={toggleModal}>Add New Card</button>
         </>
       )}
 
@@ -129,7 +113,7 @@ function App() {
       )}
 
       {modalShow && (
-        <Modal onHideModal={hideModal} onAddingCard={changeCurrentCardView} />
+        <Modal onHideModal={toggleModal} onAddingCard={changeCurrentCardView} />
       )}
     </div>
   );
