@@ -7,7 +7,6 @@ export default function useModal(initial) {
   };
   const hideModalRef = useRef();
   const hideModal = (e) => {
-    console.log(e.code);
     if (e.code === "Escape") {
       toggle();
     }
@@ -18,7 +17,7 @@ export default function useModal(initial) {
       hideModalRef.current = hideModal;
       return;
     }
-    window.removeEventListener("keydown", hideModalRef.current);
+    return window.removeEventListener("keydown", hideModalRef.current);
   }, [modalShow]);
   return [modalShow, toggle];
 }
